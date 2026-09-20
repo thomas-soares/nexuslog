@@ -1,6 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { Timer } from "lucide-react";
+import { MatchesSidebar, ResultsSidebar } from "./match-sidebar-widgets";
 
 const IG_JDG_MATCH_ID = "116957100120526836";
 
@@ -56,59 +57,6 @@ const games = [
     jdgGold: "64.108",
     igGold: "72.593",
     winner: "ig",
-  },
-];
-
-const sideMatches = [
-  {
-    href: "/lives/116957100120526824",
-    teamA: "TOP ESPORTS",
-    teamAImage:
-      "https://static.lolesports.com/teams/1592592064571_TopEsportsTES-01-FullonDark.png",
-    teamB: "Invictus Gaming",
-    teamBImage: teams.ig.image,
-    meta: "17 Sep, 06:00",
-    format: "MD5",
-  },
-  {
-    href: "/lives/116957100120526830",
-    teamA: "Xi'an Team WE",
-    teamAImage:
-      "https://static.lolesports.com/teams/1634763008788_220px-Team_WE_logo.png",
-    teamB: "Beijing JDG Esports",
-    teamBImage: teams.jdg.image,
-    meta: "18 Sep, 06:00",
-    format: "MD5",
-  },
-  {
-    href: "/lives/116957100120526836",
-    teamA: "Beijing JDG Esports",
-    teamAImage: teams.jdg.image,
-    teamB: "Invictus Gaming",
-    teamBImage: teams.ig.image,
-    meta: "19 Sep, 06:00",
-    format: "MD5",
-  },
-];
-
-const results = [
-  {
-    href: "/lives/116957100120526824",
-    teamA: "TOP ESPORTS",
-    teamB: "Invictus Gaming",
-    score: "3 - 1",
-  },
-  {
-    href: "/lives/116957100120526830",
-    teamA: "Xi'an Team WE",
-    teamB: "Beijing JDG Esports",
-    score: "1 - 3",
-  },
-  {
-    href: "/lives/116957100120526836",
-    teamA: "Beijing JDG Esports",
-    teamB: "Invictus Gaming",
-    score: "1 - 3",
   },
 ];
 
@@ -716,105 +664,6 @@ function PlayersTable({ team }: { team: "JDG" | "IG" }) {
   );
 }
 
-function SidebarMatch({
-  href,
-  teamA,
-  teamAImage,
-  teamB,
-  teamBImage,
-  meta,
-  format,
-}: {
-  href: string;
-  teamA: string;
-  teamAImage: string;
-  teamB: string;
-  teamBImage: string;
-  meta: string;
-  format: string;
-}) {
-  return (
-    <Link
-      className="grid grid-cols-2 items-center p-4 hover:bg-muted/50"
-      href={href}
-    >
-      <div className="grid grid-cols-1 gap-1 text-sm">
-        {[
-          { name: teamA, image: teamAImage },
-          { name: teamB, image: teamBImage },
-        ].map((team) => (
-          <div key={team.name} className="flex gap-2 items-center">
-            <TeamAvatar
-              src={team.image}
-              alt={team.name}
-              size="h-6 w-6 rounded-md p-1"
-            />
-            <p className="text-sm font-medium truncate">{team.name}</p>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col gap-1 items-end text-sm">
-        <time className="text-sm font-medium">{meta}</time>
-        <span className="text-sm text-muted-foreground">{format}</span>
-      </div>
-    </Link>
-  );
-}
-
-function SidebarResult({
-  href,
-  teamA,
-  teamB,
-  score,
-}: {
-  href: string;
-  teamA: string;
-  teamB: string;
-  score: string;
-}) {
-  return (
-    <Link
-      className="grid grid-cols-2 items-center p-4 hover:bg-muted/50"
-      href={href}
-    >
-      <div className="grid grid-cols-1 gap-1 text-sm">
-        {[teamA, teamB].map((team) => (
-          <div key={team} className="flex gap-2 items-center">
-            <span className="relative flex shrink-0 overflow-hidden h-6 w-6 bg-secondary rounded-md p-1" />
-            <p className="text-sm font-medium truncate">{team}</p>
-          </div>
-        ))}
-      </div>
-      <div className="flex flex-col gap-1 items-end text-sm">
-        <ResultBadge>{score}</ResultBadge>
-      </div>
-    </Link>
-  );
-}
-
-function SidebarCard({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border bg-card text-card-foreground shadow">
-      <div className="space-y-1.5 flex flex-row items-start bg-muted/50 p-4">
-        <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-7">
-          <div className="grid gap-1">
-            <div className="font-semibold leading-none tracking-tight">
-              {title}
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="p-0 divide-y">{children}</div>
-    </div>
-  );
-}
-
 function DetailsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 min-w-0 container mx-auto px-0">
@@ -854,16 +703,8 @@ function DetailsPage() {
           </div>
         </div>
         <div className="flex flex-col gap-2 md:gap-4 lg:col-span-3">
-          <SidebarCard title="Partidas">
-            {sideMatches.map((match) => (
-              <SidebarMatch key={match.href} {...match} />
-            ))}
-          </SidebarCard>
-          <SidebarCard title="Resultados">
-            {results.map((result) => (
-              <SidebarResult key={result.href} {...result} />
-            ))}
-          </SidebarCard>
+          <MatchesSidebar />
+          <ResultsSidebar />
         </div>
       </div>
     </div>
