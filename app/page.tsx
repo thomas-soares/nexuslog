@@ -1,4 +1,10 @@
-import { getUpcomingMatches, type HomeMatch } from "@/lib/lolesports";
+import Link from "next/link";
+import type { ReactNode } from "react";
+import {
+  getRecentMatches,
+  getUpcomingMatches,
+  type HomeMatch,
+} from "@/lib/lolesports";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,6 +15,27 @@ import {
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
+
+type HomeTab = "proximas" | "recentes";
+
+const TAB_LIMIT = 6;
+
+const tabContent: Record<HomeTab, { title: string; description: string }> = {
+  proximas: {
+    title: "Jogos ao vivo",
+    description: "Veja aos jogos de LoL que estao rolando ao vivo",
+  },
+  recentes: {
+    title: "Jogos recentes",
+    description: "Ultimos 6 jogos de LoL 100% realizados",
+  },
+};
+
+function getActiveTab(tab: string | string[] | undefined): HomeTab {
+  const value = Array.isArray(tab) ? tab[0] : tab;
+
+  return value === "recentes" ? "recentes" : "proximas";
+}
 
 function BrandMark({ className = "h-8 w-8" }: { className?: string }) {
   return (
@@ -26,7 +53,11 @@ function TeamLogo({ team }: { team: HomeMatch["teams"][number] }) {
     <span className="relative flex h-6 w-6 shrink-0 overflow-hidden rounded-full bg-secondary p-1">
       {team.image ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img className="aspect-square h-full w-full object-contain" alt={team.name} src={team.image} />
+        <img
+          className="aspect-square h-full w-full object-contain"
+          alt={team.name}
+          src={team.image}
+        />
       ) : (
         <span className="grid h-full w-full place-items-center text-[9px] font-semibold text-secondary-foreground">
           {team.name.slice(0, 1)}
@@ -45,7 +76,26 @@ function TeamRow({ team }: { team: HomeMatch["teams"][number] }) {
   );
 }
 
-function MatchTable({ matches }: { matches: HomeMatch[] }) {
+function ScoreBadge({ match }: { match: HomeMatch }) {
+  const homeScore = match.teams[0].score ?? 0;
+  const awayScore = match.teams[1].score ?? 0;
+
+  return (
+    <div className="flex flex-col items-end gap-1 text-sm">
+      <div className="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+        {homeScore} - {awayScore}
+      </div>
+    </div>
+  );
+}
+
+function MatchTable({
+  matches,
+  showScore = false,
+}: {
+  matches: HomeMatch[];
+  showScore?: boolean;
+}) {
   if (matches.length === 0) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -57,48 +107,68 @@ function MatchTable({ matches }: { matches: HomeMatch[] }) {
   return (
     <div className="rounded-md border">
       <div className="relative w-full overflow-auto">
-        <table className="w-full caption-bottom text-sm text-foreground">
+        <table className="w-full caption-bottom text-sm">
           <thead className="[&_tr]:border-b">
-            <tr className="border-b transition-colors hover:bg-muted/50">
-              {["Hora", "Partida", "Campeonato", "Data", "Detalhes"].map((heading) => (
+            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              {[
+                "Hora",
+                "Partida",
+                ...(showScore ? ["Resultado"] : []),
+                "Campeonato",
+                "Data",
+                "Detalhes",
+              ].map((heading) => (
                 <th
                   key={heading}
-                  className="h-12 px-4 text-left align-middle text-sm font-medium leading-5 text-muted-foreground"
+                  className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0"
                 >
-                  {heading}
+                  <div>{heading}</div>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="[&_tr:last-child]:border-0">
             {matches.map((match) => (
-              <tr key={match.id} className="border-b transition-colors hover:bg-muted/50">
-                <td className="p-4 align-middle">
-                  <span className="inline-flex items-center rounded-md border border-input bg-background px-2 py-1 text-xs font-semibold leading-4 text-foreground">
+              <tr
+                key={match.id}
+                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                data-state="false"
+              >
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <span className="inline-flex items-center rounded-md border px-2 py-1 text-xs font-semibold text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
                     <time className="font-medium">{match.time}</time>
                   </span>
                 </td>
-                <td className="p-4 align-middle">
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                   <div className="flex min-w-[260px] flex-col gap-1">
                     <TeamRow team={match.teams[0]} />
                     <TeamRow team={match.teams[1]} />
                   </div>
                 </td>
-                <td className="p-4 align-middle">
-                  <div className="flex flex-col gap-1 text-sm font-normal leading-5 text-foreground">
+                {showScore ? (
+                  <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                    <ScoreBadge match={match} />
+                  </td>
+                ) : null}
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <div className="flex flex-col gap-1 text-sm">
                     <p>{match.championship}</p>
-                    <span className="text-muted-foreground">{match.stage}</span>
+                    <span className="hidden text-muted-foreground md:inline">
+                      {match.stage}
+                    </span>
                   </div>
                 </td>
-                <td className="p-4 align-middle">
-                  <div className="flex flex-col gap-1 text-sm font-normal leading-5 text-foreground">
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                  <div className="flex flex-col gap-1 text-sm">
                     <time>{match.date}</time>
-                    <span className="text-muted-foreground">{match.format}</span>
+                    <span className="hidden text-muted-foreground md:inline">
+                      {match.format}
+                    </span>
                   </div>
                 </td>
-                <td className="p-4 align-middle">
+                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
                   <a
-                    className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium leading-none text-foreground shadow-sm ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     href={match.href}
                   >
                     Assistir
@@ -155,15 +225,51 @@ function Pagination({ totalPages }: { totalPages: number }) {
   );
 }
 
-export default async function Home() {
-  const { matches, error } = await getUpcomingMatches(10);
-  const totalPages = Math.max(1, Math.ceil(matches.length / 10));
+function TabLink({
+  activeTab,
+  tab,
+  children,
+}: {
+  activeTab: HomeTab;
+  tab: HomeTab;
+  children: ReactNode;
+}) {
+  const isActive = activeTab === tab;
+
+  return (
+    <Link
+      href={tab === "proximas" ? "/" : "/?tab=recentes"}
+      role="tab"
+      aria-selected={isActive}
+      data-state={isActive ? "active" : "inactive"}
+      className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]"
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string | string[] }>;
+}) {
+  const activeTab = getActiveTab((await searchParams).tab);
+  const { matches, error } =
+    activeTab === "recentes"
+      ? await getRecentMatches(TAB_LIMIT)
+      : await getUpcomingMatches(TAB_LIMIT);
+  const totalPages = Math.max(1, Math.ceil(matches.length / TAB_LIMIT));
+  const content = tabContent[activeTab];
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background/95 px-4 backdrop-blur md:px-6">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <a className="flex items-center gap-2 text-lg font-semibold leading-none text-foreground md:text-base" href="#">
+          <a
+            className="flex items-center gap-2 text-lg font-semibold leading-none text-foreground md:text-base"
+            href="#"
+          >
             <BrandMark className="h-6 w-6" />
             <span>NexusLog</span>
           </a>
@@ -194,22 +300,30 @@ export default async function Home() {
         </div>
       </header>
 
-      <main className="container flex flex-1 flex-col gap-4 px-4 md:gap-8 md:px-8">
+      <main className="flex flex-1 flex-col gap-4 md:gap-8 container px-4 md:px-8">
         <div className="flex flex-col gap-4 pt-4 sm:pt-8 md:gap-8">
           <div>
-            <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">NexusLog HUB</h1>
-            <p className="text-base font-normal leading-6 text-muted-foreground">HUB de conteudo competitivo</p>
+            <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">
+              NexusLog HUB
+            </h1>
+            <p className="text-base font-normal leading-6 text-muted-foreground">
+              HUB de conteudo competitivo
+            </p>
           </div>
 
           <div>
             <div className="xl:col-span-3">
-              <div className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground">
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-sm bg-background px-3 py-1.5 text-sm font-medium leading-5 text-foreground shadow-sm ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                  Próximas
-                </button>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium leading-5 text-muted-foreground ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+              <div
+                role="tablist"
+                aria-orientation="horizontal"
+                className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
+              >
+                <TabLink activeTab={activeTab} tab="proximas">
+                  Proximas
+                </TabLink>
+                <TabLink activeTab={activeTab} tab="recentes">
                   Recentes
-                </button>
+                </TabLink>
               </div>
 
               <div className="mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
@@ -217,9 +331,11 @@ export default async function Home() {
                   <div className="flex flex-col space-y-1.5 p-6">
                     <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:gap-8">
                       <div className="grid gap-1">
-                        <h3 className="text-2xl font-semibold leading-none tracking-tight text-foreground">Jogos ao vivo</h3>
-                        <p className="text-sm font-normal leading-5 text-muted-foreground">
-                          Veja aos jogos de LoL que estão rolando ao vivo
+                        <h3 className="text-2xl font-semibold leading-none tracking-tight">
+                          {content.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {content.description}
                         </p>
                       </div>
                     </div>
@@ -233,7 +349,10 @@ export default async function Home() {
                         </div>
                       ) : (
                         <>
-                          <MatchTable matches={matches} />
+                          <MatchTable
+                            matches={matches}
+                            showScore={activeTab === "recentes"}
+                          />
                           <Pagination totalPages={totalPages} />
                         </>
                       )}
@@ -247,8 +366,11 @@ export default async function Home() {
       </main>
 
       <footer className="mt-4 border-t bg-background py-6 sm:mt-6">
-        <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:gap-0 md:px-6">
-          <a className="flex items-center gap-2 text-lg font-semibold leading-none text-foreground" href="#">
+        <div className="page-container flex flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:gap-0 md:px-6">
+          <a
+            className="flex items-center gap-2 text-lg font-semibold leading-none text-foreground"
+            href="#"
+          >
             <BrandMark className="h-6 w-6" />
             <span className="sr-only">NexusLog HUB</span>
           </a>
@@ -256,10 +378,16 @@ export default async function Home() {
             © 2024 NexusLog HUB. Todos os direitos reservados.
           </p>
           <nav className="flex items-center gap-4 text-sm font-medium leading-5">
-            <a className="text-muted-foreground transition-colors hover:text-foreground hover:underline" href="#">
+            <a
+              className="text-muted-foreground transition-colors hover:text-foreground hover:underline"
+              href="#"
+            >
               Política de Privacidade
             </a>
-            <a className="text-muted-foreground transition-colors hover:text-foreground hover:underline" href="#">
+            <a
+              className="text-muted-foreground transition-colors hover:text-foreground hover:underline"
+              href="#"
+            >
               Termos de Serviço
             </a>
           </nav>

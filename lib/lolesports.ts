@@ -47,10 +47,12 @@ export type HomeMatch = {
     {
       name: string;
       image: string | null;
+      score: number | null;
     },
     {
       name: string;
       image: string | null;
+      score: number | null;
     },
   ];
   championship: string;
@@ -104,6 +106,10 @@ function isCompletedSeries(event: ScheduleEvent) {
   );
 }
 
+function isFullyCompletedSeries(event: ScheduleEvent) {
+  return event.state === "completed";
+}
+
 function toHomeMatch(event: ScheduleEvent): HomeMatch | null {
   const match = event.match;
   const teams = match?.teams;
@@ -122,10 +128,12 @@ function toHomeMatch(event: ScheduleEvent): HomeMatch | null {
       {
         name: teams[0].name ?? "TBD",
         image: normalizeImageUrl(teams[0].image),
+        score: teams[0].result?.gameWins ?? null,
       },
       {
         name: teams[1].name ?? "TBD",
         image: normalizeImageUrl(teams[1].image),
+        score: teams[1].result?.gameWins ?? null,
       },
     ],
     championship: event.league?.name ?? "LoL Esports",
@@ -212,8 +220,11 @@ export async function getRecentMatches(limit = 10): Promise<HomeMatchesResult> {
     const matches = events
       .filter((event) => event.match && event.startTime)
       .filter((event) => new Date(event.startTime as string).getTime() < now)
-      .filter(isCompletedSeries)
-      .reverse()
+      .filter(isFullyCompletedSeries)
+      .sort(
+        (a, b) =>
+          new Date(b.startTime as string).getTime() - new Date(a.startTime as string).getTime(),
+      )
       .map(toHomeMatch)
       .filter((match): match is HomeMatch => Boolean(match))
       .slice(0, limit);
