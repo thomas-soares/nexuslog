@@ -89,6 +89,33 @@ function ScoreBadge({ match }: { match: HomeMatch }) {
   );
 }
 
+function MatchAction({ match }: { match: HomeMatch }) {
+  const isLive = match.status === "inProgress";
+
+  if (isLive) {
+    return (
+      <a
+        className="inline-flex items-center rounded-md border px-2 py-1 text-xs font-semibold text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        href={match.href}
+      >
+        <span className="flex items-center gap-1.5">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" aria-hidden="true" />
+          <span>Ao vivo</span>
+        </span>
+      </a>
+    );
+  }
+
+  return (
+    <a
+      className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+      href={match.href}
+    >
+      Assistir
+    </a>
+  );
+}
+
 function MatchTable({
   matches,
   showScore = false,
@@ -167,12 +194,7 @@ function MatchTable({
                   </div>
                 </td>
                 <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                  <a
-                    className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    href={match.href}
-                  >
-                    Assistir
-                  </a>
+                  <MatchAction match={match} />
                 </td>
               </tr>
             ))}

@@ -110,6 +110,14 @@ function isFullyCompletedSeries(event: ScheduleEvent) {
   return event.state === "completed";
 }
 
+function hasSeriesStarted(event: ScheduleEvent) {
+  return event.match?.teams?.some((team) => (team.result?.gameWins ?? 0) > 0) ?? false;
+}
+
+function isInProgressSeries(event: ScheduleEvent) {
+  return event.state === "inProgress" || (hasSeriesStarted(event) && !isCompletedSeries(event));
+}
+
 function toHomeMatch(event: ScheduleEvent): HomeMatch | null {
   const match = event.match;
   const teams = match?.teams;
@@ -168,26 +176,27 @@ async function getScheduleEvents() {
 export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult> {
   try {
     const now = Date.now();
-    const liveWindowLimit = now + 5 * 60 * 60 * 1000;
     const events = await getScheduleEvents();
 
     const matches = events
-      .filter((event) => event.match && !isCompletedSeries(event))
+      .filter((event) => event.match && event.startTime && !isCompletedSeries(event))
       .filter((event) => {
-        if (!event.startTime) {
-          return false;
+        const startsAt = new Date(event.startTime as string).getTime();
+
+        return isInProgressSeries(event) || startsAt >= now;
+      })
+      .sort((a, b) => {
+        const aLive = isInProgressSeries(a);
+        const bLive = isInProgressSeries(b);
+
+        if (aLive !== bLive) {
+          return aLive ? -1 : 1;
         }
 
-        return new Date(event.startTime).getTime() >= now - 60 * 60 * 1000;
+        return new Date(a.startTime as string).getTime() - new Date(b.startTime as string).getTime();
       })
       .map((event) => {
-        if (!event.startTime) {
-          return event;
-        }
-
-        const startsAt = new Date(event.startTime).getTime();
-
-        if (startsAt <= liveWindowLimit) {
+        if (isInProgressSeries(event)) {
           return {
             ...event,
             state: "inProgress",
