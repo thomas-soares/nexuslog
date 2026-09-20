@@ -18,7 +18,9 @@ export const dynamic = "force-dynamic";
 
 type HomeTab = "proximas" | "recentes";
 
-const TAB_LIMIT = 6;
+const RECENT_LIMIT = 24;
+const PAGE_SIZE = 10;
+const ALL_UPCOMING_LIMIT = 1000;
 
 const tabContent: Record<HomeTab, { title: string; description: string }> = {
   proximas: {
@@ -27,7 +29,7 @@ const tabContent: Record<HomeTab, { title: string; description: string }> = {
   },
   recentes: {
     title: "Jogos recentes",
-    description: "Ultimos 6 jogos de LoL 100% realizados",
+    description: "Ultimos 24 jogos de LoL 100% realizados",
   },
 };
 
@@ -35,6 +37,29 @@ function getActiveTab(tab: string | string[] | undefined): HomeTab {
   const value = Array.isArray(tab) ? tab[0] : tab;
 
   return value === "recentes" ? "recentes" : "proximas";
+}
+
+function getCurrentPage(page: string | string[] | undefined) {
+  const value = Array.isArray(page) ? page[0] : page;
+  const parsed = Number(value);
+
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : 1;
+}
+
+function getPageHref(tab: HomeTab, page: number) {
+  const params = new URLSearchParams();
+
+  if (tab === "recentes") {
+    params.set("tab", "recentes");
+  }
+
+  if (page > 1) {
+    params.set("page", String(page));
+  }
+
+  const query = params.toString();
+
+  return query ? `/?${query}` : "/";
 }
 
 function BrandMark({ className = "h-8 w-8" }: { className?: string }) {
@@ -81,7 +106,7 @@ function ScoreBadge({ match }: { match: HomeMatch }) {
   const awayScore = match.teams[1].score ?? 0;
 
   return (
-    <div className="flex flex-col items-end gap-1 text-sm">
+    <div className="flex flex-col items-start gap-1 text-sm">
       <div className="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
         {homeScore} - {awayScore}
       </div>
@@ -89,7 +114,7 @@ function ScoreBadge({ match }: { match: HomeMatch }) {
   );
 }
 
-function MatchAction({ match }: { match: HomeMatch }) {
+function MatchAction({ match, label = "Assistir" }: { match: HomeMatch; label?: string }) {
   const isLive = match.status === "inProgress";
 
   if (isLive) {
@@ -111,7 +136,7 @@ function MatchAction({ match }: { match: HomeMatch }) {
       className="inline-flex h-9 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background px-3 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
       href={match.href}
     >
-      Assistir
+      {label}
     </a>
   );
 }
@@ -119,10 +144,18 @@ function MatchAction({ match }: { match: HomeMatch }) {
 function MatchTable({
   matches,
   showScore = false,
+  showDetails = false,
+  showLiveStatus = false,
+  detailsLabel = "Assistir",
 }: {
   matches: HomeMatch[];
   showScore?: boolean;
+  showDetails?: boolean;
+  showLiveStatus?: boolean;
+  detailsLabel?: string;
 }) {
+  const shouldShowLiveStatus = showLiveStatus && matches.some((match) => match.status === "inProgress");
+
   if (matches.length === 0) {
     return (
       <div className="rounded-md border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -143,7 +176,8 @@ function MatchTable({
                 ...(showScore ? ["Resultado"] : []),
                 "Campeonato",
                 "Data",
-                "Detalhes",
+                ...(shouldShowLiveStatus ? ["Status"] : []),
+                ...(showDetails ? ["Detalhes"] : []),
               ].map((heading) => (
                 <th
                   key={heading}
@@ -193,9 +227,16 @@ function MatchTable({
                     </span>
                   </div>
                 </td>
-                <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                  <MatchAction match={match} />
-                </td>
+                {shouldShowLiveStatus ? (
+                  <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                    {match.status === "inProgress" ? <MatchAction match={match} /> : null}
+                  </td>
+                ) : null}
+                {showDetails ? (
+                  <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                    <MatchAction match={match} label={detailsLabel} />
+                  </td>
+                ) : null}
               </tr>
             ))}
           </tbody>
@@ -205,42 +246,80 @@ function MatchTable({
   );
 }
 
-function Pagination({ totalPages }: { totalPages: number }) {
+function Pagination({
+  activeTab,
+  currentPage,
+  totalPages,
+}: {
+  activeTab: HomeTab;
+  currentPage: number;
+  totalPages: number;
+}) {
+  const firstPage = 1;
+  const previousPage = Math.max(firstPage, currentPage - 1);
+  const nextPage = Math.min(totalPages, currentPage + 1);
+  const isFirstPage = currentPage <= firstPage;
+  const isLastPage = currentPage >= totalPages;
+  const disabledClass =
+    "hidden h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground opacity-50 ring-offset-background transition-colors lg:flex";
+  const enabledClass =
+    "hidden h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground lg:flex";
+  const enabledInlineClass =
+    "inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground";
+  const disabledInlineClass =
+    "inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground opacity-50 ring-offset-background transition-colors";
+
   return (
     <div className="flex items-center justify-between px-2">
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex w-[100px] items-center justify-center text-sm font-medium leading-5 text-foreground">
-          Pagina 1 de {totalPages}
+          Pagina {currentPage} de {totalPages}
         </div>
         <div className="flex items-center space-x-2">
-          <button
-            className="hidden h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground opacity-50 ring-offset-background transition-colors lg:flex"
-            disabled
-          >
-            <span className="sr-only">Go to first page</span>
-            <ChevronsLeft className="h-4 w-4" />
-          </button>
-          <button
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground opacity-50 ring-offset-background transition-colors"
-            disabled
-          >
-            <span className="sr-only">Go to previous page</span>
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <button
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground"
-            disabled={totalPages <= 1}
-          >
-            <span className="sr-only">Go to next page</span>
-            <ChevronRight className="h-4 w-4" />
-          </button>
-          <button
-            className="hidden h-8 w-8 items-center justify-center rounded-md border border-input bg-background p-0 text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground lg:flex"
-            disabled={totalPages <= 1}
-          >
-            <span className="sr-only">Go to last page</span>
-            <ChevronsRight className="h-4 w-4" />
-          </button>
+          {isFirstPage ? (
+            <span className={disabledClass}>
+              <span className="sr-only">Go to first page</span>
+              <ChevronsLeft className="h-4 w-4" />
+            </span>
+          ) : (
+            <Link className={enabledClass} href={getPageHref(activeTab, firstPage)}>
+              <span className="sr-only">Go to first page</span>
+              <ChevronsLeft className="h-4 w-4" />
+            </Link>
+          )}
+          {isFirstPage ? (
+            <span className={disabledInlineClass}>
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft className="h-4 w-4" />
+            </span>
+          ) : (
+            <Link className={enabledInlineClass} href={getPageHref(activeTab, previousPage)}>
+              <span className="sr-only">Go to previous page</span>
+              <ChevronLeft className="h-4 w-4" />
+            </Link>
+          )}
+          {isLastPage ? (
+            <span className={disabledInlineClass}>
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight className="h-4 w-4" />
+            </span>
+          ) : (
+            <Link className={enabledInlineClass} href={getPageHref(activeTab, nextPage)}>
+              <span className="sr-only">Go to next page</span>
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          )}
+          {isLastPage ? (
+            <span className={disabledClass}>
+              <span className="sr-only">Go to last page</span>
+              <ChevronsRight className="h-4 w-4" />
+            </span>
+          ) : (
+            <Link className={enabledClass} href={getPageHref(activeTab, totalPages)}>
+              <span className="sr-only">Go to last page</span>
+              <ChevronsRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
       </div>
     </div>
@@ -274,14 +353,22 @@ function TabLink({
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string | string[] }>;
+  searchParams: Promise<{ tab?: string | string[]; page?: string | string[] }>;
 }) {
-  const activeTab = getActiveTab((await searchParams).tab);
+  const query = await searchParams;
+  const activeTab = getActiveTab(query.tab);
+  const requestedPage = getCurrentPage(query.page);
+  const limit = activeTab === "recentes" ? RECENT_LIMIT : ALL_UPCOMING_LIMIT;
   const { matches, error } =
     activeTab === "recentes"
-      ? await getRecentMatches(TAB_LIMIT)
-      : await getUpcomingMatches(TAB_LIMIT);
-  const totalPages = Math.max(1, Math.ceil(matches.length / TAB_LIMIT));
+      ? await getRecentMatches(limit)
+      : await getUpcomingMatches(limit);
+  const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
+  const currentPage = Math.min(requestedPage, totalPages);
+  const paginatedMatches = matches.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
   const content = tabContent[activeTab];
 
   return (
@@ -372,10 +459,17 @@ export default async function Home({
                       ) : (
                         <>
                           <MatchTable
-                            matches={matches}
+                            matches={paginatedMatches}
                             showScore={activeTab === "recentes"}
+                            showDetails={activeTab === "recentes"}
+                            showLiveStatus={activeTab === "proximas"}
+                            detailsLabel="Ver"
                           />
-                          <Pagination totalPages={totalPages} />
+                          <Pagination
+                            activeTab={activeTab}
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                          />
                         </>
                       )}
                     </div>

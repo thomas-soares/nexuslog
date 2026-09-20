@@ -77,6 +77,7 @@ function formatMatchTime(startTime: string) {
 function formatMatchDate(startTime: string) {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: DISPLAY_TIME_ZONE,
+    weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
