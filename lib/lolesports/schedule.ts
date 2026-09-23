@@ -1,11 +1,12 @@
 import { getScheduleEvents } from "./client";
 import { toHomeMatch } from "./mappers";
+import { isWithinUpcomingWindow } from "./schedule-window";
 import {
   isCompletedSeries,
   isFullyCompletedSeries,
   isInProgressSeries,
 } from "./series";
-import type { HomeMatch, HomeMatchesResult } from "./types";
+import type { HomeMatch, HomeMatchesResult, ScheduleEvent } from "./types";
 
 function isHomeMatch(match: HomeMatch | null): match is HomeMatch {
   return Boolean(match);
@@ -13,6 +14,18 @@ function isHomeMatch(match: HomeMatch | null): match is HomeMatch {
 
 function toErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Failed to load matches.";
+}
+
+export function getUpcomingEventState(event: ScheduleEvent, now = Date.now()) {
+  if (isInProgressSeries(event)) {
+    return "inProgress";
+  }
+
+  if (event.startTime && new Date(event.startTime).getTime() < now) {
+    return "pending";
+  }
+
+  return event.state;
 }
 
 export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult> {
@@ -23,9 +36,7 @@ export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult>
     const matches = events
       .filter((event) => event.match && event.startTime && !isCompletedSeries(event))
       .filter((event) => {
-        const startsAt = new Date(event.startTime as string).getTime();
-
-        return isInProgressSeries(event) || startsAt >= now;
+        return isInProgressSeries(event) || isWithinUpcomingWindow(event.startTime as string, now);
       })
       .sort((a, b) => {
         const aLive = isInProgressSeries(a);
@@ -38,14 +49,10 @@ export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult>
         return new Date(a.startTime as string).getTime() - new Date(b.startTime as string).getTime();
       })
       .map((event) => {
-        if (isInProgressSeries(event)) {
-          return {
-            ...event,
-            state: "inProgress",
-          };
-        }
-
-        return event;
+        return {
+          ...event,
+          state: getUpcomingEventState(event, now),
+        };
       })
       .map(toHomeMatch)
       .filter(isHomeMatch)

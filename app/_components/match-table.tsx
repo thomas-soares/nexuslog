@@ -43,6 +43,7 @@ function ScoreBadge({ match }: { match: HomeMatch }) {
 
 function MatchAction({ match, label = "Assistir" }: { match: HomeMatch; label?: string }) {
   const isLive = match.status === "inProgress";
+  const isPending = match.status === "pending";
 
   if (isLive) {
     return (
@@ -55,6 +56,14 @@ function MatchAction({ match, label = "Assistir" }: { match: HomeMatch; label?: 
           <span>Ao vivo</span>
         </span>
       </a>
+    );
+  }
+
+  if (isPending) {
+    return (
+      <span className="inline-flex items-center rounded-md border px-2 py-1 text-xs font-semibold text-muted-foreground">
+        Aguardando atualização
+      </span>
     );
   }
 
@@ -82,7 +91,8 @@ export function MatchTable({
   detailsLabel?: string;
 }) {
   const shouldShowLiveStatus =
-    showLiveStatus && matches.some((match) => match.status === "inProgress");
+    showLiveStatus &&
+    matches.some((match) => ["inProgress", "pending"].includes(match.status));
 
   if (matches.length === 0) {
     return (
@@ -157,7 +167,9 @@ export function MatchTable({
                 </td>
                 {shouldShowLiveStatus ? (
                   <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0">
-                    {match.status === "inProgress" ? <MatchAction match={match} /> : null}
+                    {["inProgress", "pending"].includes(match.status) ? (
+                      <MatchAction match={match} />
+                    ) : null}
                   </td>
                 ) : null}
                 {showDetails ? (
