@@ -1,4 +1,5 @@
 import type { HomeMatch } from "@/lib/lolesports";
+import { hasPartialScore } from "@/lib/lolesports/score";
 import type { HomeTab } from "../_lib/home-navigation";
 import { tabContent } from "../_lib/home-navigation";
 import { MatchTable } from "./match-table";
@@ -45,7 +46,10 @@ export function HomeMatchPanel({
               <>
                 <MatchTable
                   matches={matches}
-                  showScore={activeTab === "recentes"}
+                  showScore={activeTab === "recentes" || hasPartialScore(matches)}
+                  scoreLabel={
+                    activeTab === "recentes" ? "Resultado" : "Resultado parcial"
+                  }
                   showDetails={activeTab === "recentes"}
                   showLiveStatus={activeTab === "proximas"}
                   detailsLabel="Ver"

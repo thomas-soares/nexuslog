@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import type { HomeMatch } from "@/lib/lolesports";
+import { formatSeriesScore } from "@/lib/lolesports/score";
 
 function TeamLogo({ team }: { team: HomeMatch["teams"][number] }) {
   return (
@@ -29,13 +30,16 @@ function TeamRow({ team }: { team: HomeMatch["teams"][number] }) {
 }
 
 function ScoreBadge({ match }: { match: HomeMatch }) {
-  const homeScore = match.teams[0].score ?? 0;
-  const awayScore = match.teams[1].score ?? 0;
+  const score = formatSeriesScore(match);
+
+  if (!score) {
+    return null;
+  }
 
   return (
     <div className="flex flex-col items-start gap-1 text-sm">
       <div className="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold text-secondary-foreground transition-colors hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-        {homeScore} - {awayScore}
+        {score}
       </div>
     </div>
   );
@@ -80,12 +84,14 @@ function MatchAction({ match, label = "Assistir" }: { match: HomeMatch; label?: 
 export function MatchTable({
   matches,
   showScore = false,
+  scoreLabel = "Resultado",
   showDetails = false,
   showLiveStatus = false,
   detailsLabel = "Assistir",
 }: {
   matches: HomeMatch[];
   showScore?: boolean;
+  scoreLabel?: string;
   showDetails?: boolean;
   showLiveStatus?: boolean;
   detailsLabel?: string;
@@ -111,7 +117,7 @@ export function MatchTable({
               {[
                 "Hora",
                 "Partida",
-                ...(showScore ? ["Resultado"] : []),
+                ...(showScore ? [scoreLabel] : []),
                 "Campeonato",
                 "Data",
                 ...(shouldShowLiveStatus ? ["Status"] : []),
