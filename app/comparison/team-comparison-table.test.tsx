@@ -12,8 +12,10 @@ describe("team comparison table", () => {
     expect(markup).toContain("Winrate");
     expect(markup).toContain("Winrate Blue");
     expect(markup).toContain("Tempo médio");
+    expect(markup).toContain("1º Larva");
     expect(markup).toContain(comparisonTeams[0].team);
     expect(markup).toContain("56.2%");
+    expect(markup).toContain("13.8");
   });
 
   it("renders an empty state when there are no teams", () => {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
 import { SiteFooter } from "../_components/site-footer";
 import { SiteHeader } from "../_components/site-header";
-import { comparisonChampionship, comparisonTeams } from "./comparison-data";
+import { comparisonTournaments, getComparisonTournament } from "./comparison-data";
 import { TeamComparisonTable } from "./team-comparison-table";
 
 function ComparisonBreadcrumb() {
@@ -18,7 +18,15 @@ function ComparisonBreadcrumb() {
   );
 }
 
-export default function ComparisonPage() {
+export default async function ComparisonPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tournament?: string | string[] }>;
+}) {
+  const query = await searchParams;
+  const tournamentId = Array.isArray(query?.tournament) ? query.tournament[0] : query?.tournament;
+  const tournament = getComparisonTournament(tournamentId);
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <SiteHeader />
@@ -29,13 +37,18 @@ export default function ComparisonPage() {
           <p className="max-w-2xl text-sm text-muted-foreground">Compare o desempenho dos times no campeonato selecionado.</p>
         </section>
         <section className="flex flex-col gap-4">
-          <label className="flex max-w-sm flex-col gap-2 text-sm font-medium" htmlFor="championship">
-            Campeonato
-            <select className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal" defaultValue={comparisonChampionship} id="championship">
-              <option value={comparisonChampionship}>{comparisonChampionship}</option>
-            </select>
-          </label>
-          <TeamComparisonTable teams={comparisonTeams} />
+          <form className="flex flex-col items-start gap-2 sm:flex-row sm:items-end" method="get">
+            <label className="flex w-full max-w-sm flex-col gap-2 text-sm font-medium" htmlFor="tournament">
+              Campeonato
+              <select className="h-10 rounded-md border border-input bg-background px-3 text-sm font-normal" defaultValue={tournament.id} id="tournament" name="tournament">
+                {comparisonTournaments.map((option) => <option key={option.id} value={option.id}>{option.label}</option>)}
+              </select>
+            </label>
+            <button className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground" type="submit">
+              Aplicar
+            </button>
+          </form>
+          <TeamComparisonTable teams={tournament.teams} />
         </section>
       </main>
       <SiteFooter />
