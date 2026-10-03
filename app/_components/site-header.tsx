@@ -1,4 +1,4 @@
-import { MessageSquare, Sun } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { BrandMark } from "./brand-mark";
 
 export function SiteHeader() {
@@ -21,9 +21,6 @@ export function SiteHeader() {
             Feedback
           </button>
         </div>
-        <button className="inline-flex h-10 w-10 items-center justify-center whitespace-nowrap rounded-md border border-input bg-background text-sm font-medium text-foreground ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-          <Sun className="h-[1.2rem] w-[1.2rem]" />
-        </button>
       </div>
     </header>
   );
