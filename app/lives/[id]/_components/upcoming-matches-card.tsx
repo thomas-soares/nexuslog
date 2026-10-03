@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { HomeMatch } from "@/lib/lolesports";
+import { LiveStatus } from "../../../_components/live-status";
 import { SidebarCard, TeamAvatar } from "./sidebar-card";
 
 function UpcomingMatchRow({ match }: { match: HomeMatch }) {
@@ -17,7 +18,7 @@ function UpcomingMatchRow({ match }: { match: HomeMatch }) {
       </div>
       <div className="flex flex-col items-end gap-1 text-sm">
         {isLive ? (
-          <span className="text-sm font-semibold text-red-600">Ao vivo</span>
+          <LiveStatus />
         ) : (
           <time className="text-sm font-medium">
             {match.date.replace(/,\s+\d{4}$/, "")}, {match.time}
