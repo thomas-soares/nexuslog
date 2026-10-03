@@ -5,8 +5,8 @@ export const ALL_UPCOMING_LIMIT = 1000;
 
 export const tabContent: Record<HomeTab, { title: string; description: string }> = {
   proximas: {
-    title: "Jogos ao vivo",
-    description: "Veja aos jogos de LoL que estao rolando ao vivo",
+    title: "Próximas partidas",
+    description: "Partidas ao vivo e próximas partidas de League of Legends",
   },
   recentes: {
     title: "Jogos recentes",
