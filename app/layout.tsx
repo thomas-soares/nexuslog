@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NexusLog HUB",
-  description: "HUB de conteudo competitivo",
+  title: "NexusLog",
+  description: "Conteúdo competitivo de League of Legends",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

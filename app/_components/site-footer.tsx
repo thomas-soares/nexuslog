@@ -9,10 +9,10 @@ export function SiteFooter() {
           href="#"
         >
           <BrandMark className="h-6 w-6" />
-          <span className="sr-only">NexusLog HUB</span>
+          <span className="sr-only">NexusLog</span>
         </a>
         <p className="text-balance text-center text-sm font-normal leading-loose text-muted-foreground md:text-left">
-          © 2024 NexusLog HUB. Todos os direitos reservados.
+          © 2026 NexusLog. Todos os direitos reservados.
         </p>
         <nav className="flex items-center gap-4 text-sm font-medium leading-5">
           <a

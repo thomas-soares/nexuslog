@@ -41,10 +41,10 @@ export default async function Home({
         <div className="flex flex-col gap-4 pt-4 sm:pt-8 md:gap-8">
           <div>
             <h1 className="text-2xl font-bold leading-8 tracking-tight text-foreground">
-              NexusLog HUB
+              NexusLog
             </h1>
             <p className="text-base font-normal leading-6 text-muted-foreground">
-              HUB de conteudo competitivo
+              Conteúdo competitivo de League of Legends
             </p>
           </div>
 

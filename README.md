@@ -1,6 +1,6 @@
-# NexusLog HUB
+# NexusLog
 
-NexusLog HUB é uma aplicação Next.js para acompanhar partidas competitivas de League of Legends. A home lista partidas próximas, em andamento e recentes usando a agenda oficial do LoL Esports.
+NexusLog é uma aplicação Next.js para acompanhar partidas competitivas de League of Legends. A home lista partidas próximas, em andamento e recentes usando a agenda oficial do LoL Esports.
 
 ## Estado atual
 
