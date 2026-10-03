@@ -38,6 +38,7 @@ describe("home page", () => {
     );
 
     expect(markup).toContain("NexusLog");
+    expect(markup).toContain("/comparison");
     expect(markup).toContain("Blue");
     expect(mockedGetUpcomingMatches).toHaveBeenCalledWith(1000);
   });
@@ -46,7 +47,7 @@ describe("home page", () => {
     mockedGetRecentMatches.mockResolvedValue({ matches: [match], error: null });
 
     const markup = renderToStaticMarkup(
-      await Home({ searchParams: Promise.resolve({ tab: "recentes" }) }),
+      await Home({ searchParams: Promise.resolve({ tab: "recent" }) }),
     );
 
     expect(markup).toContain("Jogos recentes");
