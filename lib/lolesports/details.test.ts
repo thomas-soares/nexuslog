@@ -21,7 +21,7 @@ describe("mapMatchDetails", () => {
                 { id: "blue-team", side: "blue" },
                 { id: "red-team", side: "red" },
               ],
-              vods: [],
+              vods: [{ startMillis: 0, endMillis: 2220000 }],
             },
             {
               number: 2,

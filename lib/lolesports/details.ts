@@ -186,6 +186,17 @@ function formatTimestampDuration(startTimestamp: string | undefined, endTimestam
   return formatDuration(Date.parse(startTimestamp), Date.parse(endTimestamp));
 }
 
+function formatGameDuration(game: RawGame, feed: MatchFeedBundle | undefined) {
+  const feedDuration = formatTimestampDuration(feed?.startedAt, feed?.window?.rfc460Timestamp);
+  const missingDuration = formatDuration(undefined, undefined);
+
+  if (feedDuration !== missingDuration) {
+    return feedDuration;
+  }
+
+  return formatDuration(game.vods?.[0]?.startMillis, game.vods?.[0]?.endMillis);
+}
+
 function formatDamageShare(value: number | undefined) {
   return value === undefined ? null : Math.round(value * 100);
 }
@@ -298,10 +309,7 @@ export function mapMatchDetails(event: RawEvent, feeds: MatchFeedBundle[]): Matc
       id: game.id,
       number: game.number ?? 0,
       state: game.state ?? feed?.window?.gameState ?? "unknown",
-      duration:
-        formatDuration(game.vods?.[0]?.startMillis, game.vods?.[0]?.endMillis) !== "—"
-          ? formatDuration(game.vods?.[0]?.startMillis, game.vods?.[0]?.endMillis)
-          : formatTimestampDuration(feed?.startedAt, feed?.window?.rfc460Timestamp),
+      duration: formatGameDuration(game, feed),
       winnerTeamId: winner && winner.kills > 0 ? winner.teamId : null,
       teams: gameTeams,
       players: mapPlayers(feed?.window ?? null, feed?.metadata ?? null, feed?.details ?? null, gameTeams),
