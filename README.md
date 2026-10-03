@@ -9,8 +9,7 @@ NexusLog HUB é uma aplicação Next.js para acompanhar partidas competitivas de
 - Quando o horário já começou, mas a API ainda não confirmou `inProgress`, a partida aparece como **Aguardando atualização**.
 - Quando a API confirma `inProgress`, a partida aparece como **Ao vivo**.
 - A aba **Recentes** lista séries finalizadas.
-- A rota `/lives/[id]` ainda é um protótipo: os detalhes são mockados e só estão habilitados para o confronto JDG x IG usado no mock.
-
+- A rota `/lives/[id]` exibe detalhes reais para qualquer ID numérico de partida retornado pela API do LoL Esports.
 ## Stack
 
 - Next.js 16 com App Router e Server Components
@@ -81,7 +80,7 @@ O estado visual é separado do estado original da API:
 
 ### Detalhes da partida
 
-`app/lives/[id]` atualmente usa dados estáticos de `app/lives/[id]/data/mock-match.ts`. Os componentes dessa tela já representam resumo da série, jogos, objetivos, bans, jogadores, itens e widgets laterais, mas ainda não consomem `getEventDetails` nem o feed de live stats.
+`app/lives/[id]` busca `getEventDetails` e os feeds `livestats/v1/window` e `livestats/v1/details` no servidor para qualquer ID numérico de partida. O detalhe mostra o placar da série, abas por jogo, duração, patch, ouro, abates, objetivos, dragões, jogadores, itens, KDA, CS e participação no dano. Jogos e campos sem dados disponíveis permanecem vazios.
 
 ## Estrutura principal
 
@@ -93,7 +92,7 @@ app/
 ├── _components/                     # Componentes da home
 └── lives/[id]/                       # Protótipo de detalhes da partida
     ├── page.tsx
-    ├── data/mock-match.ts
+    ├── data/mock-match.ts              # Dados legados do protótipo
     └── _components/
 lib/
 ├── lolesports/                      # Cliente, tipos, filtros e mapeadores
@@ -115,7 +114,7 @@ A integração atual da home usa:
 GET https://esports-api.lolesports.com/persisted/gw/getSchedule?hl=en-US
 ```
 
-Para tornar a tela de detalhes real, o próximo passo é integrar `getEventDetails`, `getStandings`, `livestats/v1/window`, `livestats/v1/details` e os assets do Data Dragon no servidor.
+Os detalhes usam `getEventDetails`, `livestats/v1/window`, `livestats/v1/details` e os assets do Data Dragon. A rota aceita IDs numéricos e trata erros ou partidas sem detalhes com uma mensagem de indisponibilidade.
 
 ## Testes
 

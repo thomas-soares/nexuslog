@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 type TeamAvatarProps = {
-  src: string;
+  src?: string | null;
   alt: string;
   size?: string;
 };
@@ -14,7 +14,7 @@ export function TeamAvatar({ src, alt, size = "h-14 w-14" }: TeamAvatarProps) {
       <img
         className="aspect-square h-full w-full object-contain"
         alt={alt}
-        src={src}
+        src={src ?? undefined}
       />
     </span>
   );
