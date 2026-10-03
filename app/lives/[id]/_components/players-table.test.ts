@@ -9,4 +9,10 @@ describe("formatPlayerLabel", () => {
   it("keeps the team tag for legacy player names without it", () => {
     expect(formatPlayerLabel("JDG", "Ale")).toBe("JDG Ale");
   });
+
+  it("returns whichever label is available when one side is empty", () => {
+    expect(formatPlayerLabel("", "Ale")).toBe("Ale");
+    expect(formatPlayerLabel("JDG", "")).toBe("JDG");
+    expect(formatPlayerLabel("", "")).toBe("");
+  });
 });

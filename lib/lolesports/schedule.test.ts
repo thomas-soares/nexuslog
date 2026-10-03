@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getScheduleEvents } from "./client";
-import { getRecentMatches, isUpcomingOrLiveEvent } from "./schedule";
+import {
+  getRecentMatches,
+  getUpcomingMatches,
+  isUpcomingOrLiveEvent,
+} from "./schedule";
 
 vi.mock("./client", () => ({
   getScheduleEvents: vi.fn(),
@@ -62,5 +66,60 @@ describe("upcoming matches", () => {
         now,
       ),
     ).toBe(true);
+  });
+
+  it("puts live matches before scheduled matches and marks started matches pending", async () => {
+    const now = Date.now();
+    mockedGetScheduleEvents.mockResolvedValue([
+      {
+        id: "future-late",
+        startTime: new Date(now + 30 * 60_000).toISOString(),
+        state: "unstarted",
+        match: { id: "future-late", teams: [{ name: "Late A" }, { name: "Late B" }] },
+      },
+      {
+        id: "live",
+        startTime: new Date(now - 2 * 60 * 60_000).toISOString(),
+        state: "inProgress",
+        match: { id: "live", teams: [{ name: "Live A" }, { name: "Live B" }] },
+      },
+      {
+        id: "pending",
+        startTime: new Date(now - 15 * 60_000).toISOString(),
+        state: "unstarted",
+        match: { id: "pending", teams: [{ name: "Pending A" }, { name: "Pending B" }] },
+      },
+      {
+        id: "completed",
+        startTime: new Date(now - 2 * 60 * 60_000).toISOString(),
+        state: "completed",
+        match: { id: "completed", teams: [{ name: "Done A" }, { name: "Done B" }] },
+      },
+    ]);
+
+    const result = await getUpcomingMatches();
+
+    expect(result.matches.map((match) => match.id)).toEqual(["live", "pending", "future-late"]);
+    expect(result.matches[1].status).toBe("pending");
+  });
+
+  it("returns a readable error when loading upcoming matches fails", async () => {
+    mockedGetScheduleEvents.mockRejectedValue(new Error("network down"));
+
+    await expect(getUpcomingMatches()).resolves.toEqual({
+      matches: [],
+      error: "network down",
+    });
+  });
+});
+
+describe("recent matches errors", () => {
+  it("returns a fallback error for non-Error failures", async () => {
+    mockedGetScheduleEvents.mockRejectedValue("network down");
+
+    await expect(getRecentMatches(3)).resolves.toEqual({
+      matches: [],
+      error: "Failed to load matches.",
+    });
   });
 });

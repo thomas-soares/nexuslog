@@ -91,4 +91,35 @@ describe("mapMatchDetails", () => {
     expect(result.games[0].players[0].items).toEqual(["3089"]);
     expect(result.patchVersion).toBe("16.18.1");
   });
+
+  it("uses safe defaults when event and feed fields are incomplete", () => {
+    const result = mapMatchDetails(
+      {
+        match: {
+          games: {
+            id: "game-1",
+            teams: [
+              { id: "blue-team", side: "blue" },
+              { id: "invalid-team", side: "purple" },
+              { side: "red" },
+            ],
+          },
+        },
+      } as never,
+      [{ gameId: "game-1", window: null, metadata: null, details: null }],
+    );
+
+    expect(result.leagueName).toBe("LoL Esports");
+    expect(result.leagueImage).toBeNull();
+    expect(result.bestOf).toBe(1);
+    expect(result.games[0]).toMatchObject({
+      id: "game-1",
+      state: "unknown",
+      duration: "—",
+      winnerTeamId: null,
+      teams: [{ teamId: "blue-team", side: "blue" }],
+      players: [],
+    });
+    expect(result.patchVersion).toBe("—");
+  });
 });
