@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { championImageUrl, itemImageUrl } from "@/lib/datadragon/urls";
+import { formatPlayerLabel } from "@/lib/lolesports/player-name";
 import type { MatchDetailPlayer } from "@/lib/lolesports/details";
 
 function formatNumber(value: number) {
@@ -61,7 +62,7 @@ export function PlayersTable({
                       </span>
                       <div>
                         <p className="font-bold">{player.champion}</p>
-                        <p className="text-gray-400">{teamName} {player.name}</p>
+                        <p className="text-gray-400">{formatPlayerLabel(teamName, player.name)}</p>
                       </div>
                     </div>
                   </td>
