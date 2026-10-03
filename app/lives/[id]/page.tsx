@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChevronRight, Home } from "lucide-react";
+import { getUpcomingMatches } from "@/lib/lolesports";
 import { getMatchDetails } from "@/lib/lolesports/details";
 import { isValidMatchId } from "@/lib/lolesports/details-route";
 import { SiteHeader } from "../../_components/site-header";
@@ -46,22 +47,27 @@ export default async function LiveDetailsPage({
     return <DetailsUnavailable message="O ID da partida é inválido." />;
   }
 
-  let match;
+  let pageData;
 
   try {
-    match = await getMatchDetails(id);
+    pageData = await Promise.all([
+      getMatchDetails(id),
+      getUpcomingMatches(3),
+    ]);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Não foi possível carregar esta partida.";
 
     return <DetailsUnavailable message={message} />;
   }
 
+  const [matchDetails, upcomingResult] = pageData;
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
       <SiteHeader />
       <main className="container flex flex-1 flex-col gap-4 px-4 py-4 md:px-8">
         <MatchBreadcrumb />
-        <LiveDetails match={match} />
+        <LiveDetails match={matchDetails} sidebarMatches={upcomingResult.matches} />
       </main>
     </div>
   );

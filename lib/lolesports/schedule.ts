@@ -28,6 +28,10 @@ export function getUpcomingEventState(event: ScheduleEvent, now = Date.now()) {
   return event.state;
 }
 
+export function isUpcomingOrLiveEvent(event: ScheduleEvent, now = Date.now()) {
+  return isInProgressSeries(event) || isWithinUpcomingWindow(event.startTime as string, now);
+}
+
 export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult> {
   try {
     const now = Date.now();
@@ -35,9 +39,7 @@ export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult>
 
     const matches = events
       .filter((event) => event.match && event.startTime && !isCompletedSeries(event))
-      .filter((event) => {
-        return isInProgressSeries(event) || isWithinUpcomingWindow(event.startTime as string, now);
-      })
+      .filter((event) => isUpcomingOrLiveEvent(event, now))
       .sort((a, b) => {
         const aLive = isInProgressSeries(a);
         const bLive = isInProgressSeries(b);

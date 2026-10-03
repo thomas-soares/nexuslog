@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getScheduleEvents } from "./client";
-import { getRecentMatches } from "./schedule";
+import { getRecentMatches, isUpcomingOrLiveEvent } from "./schedule";
 
 vi.mock("./client", () => ({
   getScheduleEvents: vi.fn(),
@@ -30,5 +30,37 @@ describe("recent matches", () => {
     const result = await getRecentMatches();
 
     expect(result.matches).toHaveLength(25);
+  });
+});
+
+describe("upcoming matches", () => {
+  it("keeps live matches visible after the upcoming window expires", () => {
+    const now = new Date("2026-10-03T15:00:00.000Z").getTime();
+
+    expect(
+      isUpcomingOrLiveEvent(
+        {
+          state: "inProgress",
+          startTime: "2026-10-03T12:00:00.000Z",
+          match: { strategy: { count: 3 } },
+        },
+        now,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps scheduled matches inside the upcoming window", () => {
+    const now = new Date("2026-10-03T15:00:00.000Z").getTime();
+
+    expect(
+      isUpcomingOrLiveEvent(
+        {
+          state: "unstarted",
+          startTime: "2026-10-03T15:30:00.000Z",
+          match: { strategy: { count: 3 } },
+        },
+        now,
+      ),
+    ).toBe(true);
   });
 });

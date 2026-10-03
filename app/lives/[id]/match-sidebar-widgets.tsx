@@ -1,43 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import type { ReactNode } from "react";
-
-const teamImages = {
-  jdg: "https://static.lolesports.com/teams/1627457924722_29.png",
-  ig: "https://static.lolesports.com/teams/1634762917340_300px-Invictus_Gaming_logo.png",
-};
-
-const sideMatches = [
-  {
-    href: "/lives/116957100120526824",
-    teamA: "TOP ESPORTS",
-    teamAImage:
-      "https://static.lolesports.com/teams/1592592064571_TopEsportsTES-01-FullonDark.png",
-    teamB: "Invictus Gaming",
-    teamBImage: teamImages.ig,
-    meta: "17 Sep, 06:00",
-    format: "MD5",
-  },
-  {
-    href: "/lives/116957100120526830",
-    teamA: "Xi'an Team WE",
-    teamAImage:
-      "https://static.lolesports.com/teams/1634763008788_220px-Team_WE_logo.png",
-    teamB: "Beijing JDG Esports",
-    teamBImage: teamImages.jdg,
-    meta: "18 Sep, 06:00",
-    format: "MD5",
-  },
-  {
-    href: "/lives/116957100120526836",
-    teamA: "Beijing JDG Esports",
-    teamAImage: teamImages.jdg,
-    teamB: "Invictus Gaming",
-    teamBImage: teamImages.ig,
-    meta: "19 Sep, 06:00",
-    format: "MD5",
-  },
-];
+import type { HomeMatch } from "@/lib/lolesports";
 
 const results = [
   {
@@ -106,41 +70,34 @@ function SidebarCard({ title, children }: { title: string; children: ReactNode }
 }
 
 function SidebarMatch({
-  href,
-  teamA,
-  teamAImage,
-  teamB,
-  teamBImage,
-  meta,
-  format,
+  match,
 }: {
-  href: string;
-  teamA: string;
-  teamAImage: string;
-  teamB: string;
-  teamBImage: string;
-  meta: string;
-  format: string;
+  match: HomeMatch;
 }) {
+  const isLive = match.status === "inProgress";
+
   return (
     <Link
       className="grid grid-cols-2 items-center p-4 hover:bg-muted/50"
-      href={href}
+      href={match.href}
     >
       <div className="grid grid-cols-1 gap-1 text-sm">
-        {[
-          { name: teamA, image: teamAImage },
-          { name: teamB, image: teamBImage },
-        ].map((team) => (
+        {match.teams.map((team) => (
           <div key={team.name} className="flex gap-2 items-center">
-            <TeamAvatar src={team.image} alt={team.name} />
+            <TeamAvatar src={team.image ?? undefined} alt={team.name} />
             <p className="text-sm font-medium truncate">{team.name}</p>
           </div>
         ))}
       </div>
       <div className="flex flex-col gap-1 items-end text-sm">
-        <time className="text-sm font-medium">{meta}</time>
-        <span className="text-sm text-muted-foreground">{format}</span>
+        {isLive ? (
+          <span className="text-sm font-semibold text-red-600">Ao vivo</span>
+        ) : (
+          <time className="text-sm font-medium">
+            {match.date.replace(/,\s+\d{4}$/, "")}, {match.time}
+          </time>
+        )}
+        <span className="text-sm text-muted-foreground">{match.format}</span>
       </div>
     </Link>
   );
@@ -177,12 +134,14 @@ function SidebarResult({
   );
 }
 
-export function MatchesSidebar() {
+export function MatchesSidebar({ matches }: { matches: HomeMatch[] }) {
   return (
     <SidebarCard title="Partidas">
-      {sideMatches.map((match) => (
-        <SidebarMatch key={match.href} {...match} />
-      ))}
+      {matches.length > 0 ? (
+        matches.map((match) => <SidebarMatch key={match.id} match={match} />)
+      ) : (
+        <p className="p-4 text-sm text-muted-foreground">Nenhuma partida próxima.</p>
+      )}
     </SidebarCard>
   );
 }
