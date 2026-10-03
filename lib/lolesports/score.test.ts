@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatSeriesScore, hasPartialScore } from "./score";
+import { formatSeriesScore, hasMatchScore, hasPartialScore } from "./score";
 import type { HomeMatch } from "./types";
 
 const match = (homeScore: number | null, awayScore: number | null): HomeMatch => ({
@@ -20,9 +20,11 @@ const match = (homeScore: number | null, awayScore: number | null): HomeMatch =>
 describe("series score display", () => {
   it("detects when a match has a partial series score", () => {
     expect(hasPartialScore([match(1, 0)])).toBe(true);
+    expect(hasPartialScore([{ ...match(1, 0), format: "MD1" }])).toBe(false);
     expect(hasPartialScore([match(null, null)])).toBe(false);
     expect(hasPartialScore([match(0, 0)])).toBe(false);
     expect(hasPartialScore([{ ...match(0, 0), status: "inProgress" }])).toBe(true);
+    expect(hasMatchScore([{ ...match(0, 0), format: "MD1", status: "inProgress" }])).toBe(true);
   });
 
   it("leaves the score empty when the series has not started", () => {

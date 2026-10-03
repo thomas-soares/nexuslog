@@ -1,5 +1,5 @@
 import type { HomeMatch } from "@/lib/lolesports";
-import { hasPartialScore } from "@/lib/lolesports/score";
+import { hasMatchScore, hasPartialScore } from "@/lib/lolesports/score";
 import type { HomeTab } from "../_lib/home-navigation";
 import { tabContent } from "../_lib/home-navigation";
 import { MatchTable } from "./match-table";
@@ -19,6 +19,7 @@ export function HomeMatchPanel({
   totalPages: number;
 }) {
   const content = tabContent[activeTab];
+  const hasPartialSeriesScore = hasPartialScore(matches);
 
   return (
     <div className="mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
@@ -46,9 +47,11 @@ export function HomeMatchPanel({
               <>
                 <MatchTable
                   matches={matches}
-                  showScore={activeTab === "recent" || hasPartialScore(matches)}
+                  showScore={activeTab === "recent" || hasMatchScore(matches)}
                   scoreLabel={
-                    activeTab === "recent" ? "Resultado" : "Resultado parcial"
+                    activeTab === "recent" || !hasPartialSeriesScore
+                      ? "Resultado"
+                      : "Resultado parcial"
                   }
                   showDetails={activeTab === "recent"}
                   showLiveStatus={activeTab === "upcoming"}
