@@ -1,9 +1,14 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ChevronRight, Home } from "lucide-react";
 import { SiteFooter } from "../_components/site-footer";
 import { SiteHeader } from "../_components/site-header";
 import { comparisonTournaments, getComparisonTournament } from "./comparison-data";
 import { TeamComparisonTable } from "./team-comparison-table";
+
+export const metadata: Metadata = {
+  title: "Comparativo de times",
+};
 
 function ComparisonBreadcrumb() {
   return (

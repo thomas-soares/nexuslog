@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getRecentMatches, getUpcomingMatches } from "@/lib/lolesports";
 import { getMatchDetails } from "@/lib/lolesports/details";
-import LiveDetailsPage from "./page";
+import LiveDetailsPage, { generateMetadata } from "./page";
 
 vi.mock("@/lib/lolesports", () => ({
   getRecentMatches: vi.fn(),
@@ -33,6 +33,12 @@ describe("live details page", () => {
     mockedGetMatchDetails.mockResolvedValue(matchDetails);
     mockedGetUpcomingMatches.mockResolvedValue({ matches: [], error: null });
     mockedGetRecentMatches.mockResolvedValue({ matches: [], error: null });
+  });
+
+  it("uses team abbreviations in the page metadata", async () => {
+    const metadata = await generateMetadata({ params: Promise.resolve({ id: "123" }) });
+
+    expect(metadata.title).toBe("BLU vs RED");
   });
 
   it("rejects invalid match ids", async () => {

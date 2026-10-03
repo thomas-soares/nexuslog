@@ -1,10 +1,37 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ChevronRight, Home } from "lucide-react";
 import { getRecentMatches, getUpcomingMatches } from "@/lib/lolesports";
 import { getMatchDetails } from "@/lib/lolesports/details";
 import { isValidMatchId } from "@/lib/lolesports/details-route";
 import { SiteHeader } from "../../_components/site-header";
 import { LiveDetails } from "./_components/live-details";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  if (!isValidMatchId(id)) {
+    return { title: "Partida inválida" };
+  }
+
+  try {
+    const match = await getMatchDetails(id);
+    const [firstTeam, secondTeam] = match.teams;
+    const matchup = [firstTeam?.shortName, secondTeam?.shortName]
+      .filter(Boolean)
+      .join(" vs ");
+
+    return {
+      title: matchup || `Partida ${id}`,
+    };
+  } catch {
+    return { title: `Partida ${id}` };
+  }
+}
 
 function DetailsUnavailable({ message }: { message: string }) {
   return (

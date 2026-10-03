@@ -9,7 +9,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "NexusLog",
+  title: {
+    default: "NexusLog",
+    template: "%s | NexusLog",
+  },
   description: "Conteúdo competitivo de League of Legends",
 };
 
