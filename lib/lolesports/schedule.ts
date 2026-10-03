@@ -70,7 +70,7 @@ export async function getUpcomingMatches(limit = 10): Promise<HomeMatchesResult>
   }
 }
 
-export async function getRecentMatches(limit = 10): Promise<HomeMatchesResult> {
+export async function getRecentMatches(limit?: number): Promise<HomeMatchesResult> {
   try {
     const now = Date.now();
     const events = await getScheduleEvents();
@@ -84,11 +84,12 @@ export async function getRecentMatches(limit = 10): Promise<HomeMatchesResult> {
           new Date(b.startTime as string).getTime() - new Date(a.startTime as string).getTime(),
       )
       .map(toHomeMatch)
-      .filter(isHomeMatch)
-      .slice(0, limit);
+      .filter(isHomeMatch);
+
+    const limitedMatches = limit === undefined ? matches : matches.slice(0, limit);
 
     return {
-      matches,
+      matches: limitedMatches,
       error: null,
     };
   } catch (error) {

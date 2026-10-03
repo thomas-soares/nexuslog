@@ -5,7 +5,6 @@ import { SiteHeader } from "./_components/site-header";
 import {
   ALL_UPCOMING_LIMIT,
   PAGE_SIZE,
-  RECENT_LIMIT,
   getActiveTab,
   getCurrentPage,
 } from "./_lib/home-navigation";
@@ -21,11 +20,10 @@ export default async function Home({
   const query = await searchParams;
   const activeTab = getActiveTab(query.tab);
   const requestedPage = getCurrentPage(query.page);
-  const limit = activeTab === "recentes" ? RECENT_LIMIT : ALL_UPCOMING_LIMIT;
   const { matches, error } =
     activeTab === "recentes"
-      ? await getRecentMatches(limit)
-      : await getUpcomingMatches(limit);
+      ? await getRecentMatches()
+      : await getUpcomingMatches(ALL_UPCOMING_LIMIT);
   const totalPages = Math.max(1, Math.ceil(matches.length / PAGE_SIZE));
   const currentPage = Math.min(requestedPage, totalPages);
   const paginatedMatches = matches.slice(

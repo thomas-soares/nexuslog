@@ -1,6 +1,5 @@
 export type HomeTab = "proximas" | "recentes";
 
-export const RECENT_LIMIT = 24;
 export const PAGE_SIZE = 10;
 export const ALL_UPCOMING_LIMIT = 1000;
 
@@ -11,7 +10,7 @@ export const tabContent: Record<HomeTab, { title: string; description: string }>
   },
   recentes: {
     title: "Jogos recentes",
-    description: "Ultimos 24 jogos de LoL 100% realizados",
+    description: "Todas as partidas de LoL já realizadas disponíveis na agenda",
   },
 };
 
