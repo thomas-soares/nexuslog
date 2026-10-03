@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import type { MatchDetailsData } from "@/lib/lolesports/details";
 import type { HomeMatch } from "@/lib/lolesports";
-import { MatchesSidebar, ResultsSidebar } from "../match-sidebar-widgets";
+import type { MatchDetailsData } from "@/lib/lolesports/details";
+import { MatchSidebar } from "../match-sidebar-widgets";
 import { GameCard } from "./game-card";
 import { MatchSummaryCard } from "./match-summary-card";
 
-export function LiveDetails({ match, sidebarMatches }: { match: MatchDetailsData; sidebarMatches: HomeMatch[] }) {
+export function LiveDetails({
+  match,
+  upcomingMatches,
+  recentMatches,
+}: {
+  match: MatchDetailsData;
+  upcomingMatches: HomeMatch[];
+  recentMatches: HomeMatch[];
+}) {
   const [activeGameNumber, setActiveGameNumber] = useState(match.games[0]?.number ?? 1);
   const activeGame = match.games.find((game) => game.number === activeGameNumber) ?? match.games[0];
 
@@ -52,8 +60,7 @@ export function LiveDetails({ match, sidebarMatches }: { match: MatchDetailsData
           </div>
         </div>
         <aside className="flex min-w-0 flex-col gap-4 lg:col-span-3">
-          <MatchesSidebar matches={sidebarMatches} />
-          <ResultsSidebar />
+          <MatchSidebar upcomingMatches={upcomingMatches} recentMatches={recentMatches} />
         </aside>
       </div>
     </div>
