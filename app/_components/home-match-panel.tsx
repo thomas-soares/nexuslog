@@ -46,12 +46,12 @@ export function HomeMatchPanel({
               <>
                 <MatchTable
                   matches={matches}
-                  showScore={activeTab === "recentes" || hasPartialScore(matches)}
+                  showScore={activeTab === "recent" || hasPartialScore(matches)}
                   scoreLabel={
-                    activeTab === "recentes" ? "Resultado" : "Resultado parcial"
+                    activeTab === "recent" ? "Resultado" : "Resultado parcial"
                   }
-                  showDetails={activeTab === "recentes"}
-                  showLiveStatus={activeTab === "proximas"}
+                  showDetails={activeTab === "recent"}
+                  showLiveStatus={activeTab === "upcoming"}
                   detailsLabel="Ver"
                 />
                 <Pagination

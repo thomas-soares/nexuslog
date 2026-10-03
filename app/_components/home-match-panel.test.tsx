@@ -22,7 +22,7 @@ describe("home match panel", () => {
   it("renders the match list and pagination", () => {
     const markup = renderToStaticMarkup(
       <HomeMatchPanel
-        activeTab="proximas"
+        activeTab="upcoming"
         currentPage={1}
         error={null}
         matches={[match]}
@@ -39,7 +39,7 @@ describe("home match panel", () => {
     expect(
       renderToStaticMarkup(
         <HomeMatchPanel
-          activeTab="recentes"
+          activeTab="recent"
           currentPage={1}
           error="Failed to load matches."
           matches={[]}

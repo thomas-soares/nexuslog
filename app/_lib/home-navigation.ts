@@ -1,14 +1,14 @@
-export type HomeTab = "proximas" | "recentes";
+export type HomeTab = "upcoming" | "recent";
 
 export const PAGE_SIZE = 10;
 export const ALL_UPCOMING_LIMIT = 1000;
 
 export const tabContent: Record<HomeTab, { title: string; description: string }> = {
-  proximas: {
+  upcoming: {
     title: "Próximas partidas",
     description: "Partidas ao vivo e próximas partidas de League of Legends",
   },
-  recentes: {
+  recent: {
     title: "Jogos recentes",
     description: "Todas as partidas de LoL já realizadas disponíveis na agenda",
   },
@@ -17,7 +17,7 @@ export const tabContent: Record<HomeTab, { title: string; description: string }>
 export function getActiveTab(tab: string | string[] | undefined): HomeTab {
   const value = Array.isArray(tab) ? tab[0] : tab;
 
-  return value === "recentes" ? "recentes" : "proximas";
+  return value === "recent" ? "recent" : "upcoming";
 }
 
 export function getCurrentPage(page: string | string[] | undefined) {
@@ -30,8 +30,8 @@ export function getCurrentPage(page: string | string[] | undefined) {
 export function getPageHref(tab: HomeTab, page: number) {
   const params = new URLSearchParams();
 
-  if (tab === "recentes") {
-    params.set("tab", "recentes");
+  if (tab === "recent") {
+    params.set("tab", "recent");
   }
 
   if (page > 1) {

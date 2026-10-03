@@ -15,7 +15,7 @@ function TabLink({
 
   return (
     <Link
-      href={tab === "proximas" ? "/" : "/?tab=recentes"}
+      href={tab === "upcoming" ? "/" : "/?tab=recent"}
       role="tab"
       aria-selected={isActive}
       data-state={isActive ? "active" : "inactive"}
@@ -33,10 +33,10 @@ export function HomeTabs({ activeTab }: { activeTab: HomeTab }) {
       aria-orientation="horizontal"
       className="inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground"
     >
-      <TabLink activeTab={activeTab} tab="proximas">
+      <TabLink activeTab={activeTab} tab="upcoming">
         Proximas
       </TabLink>
-      <TabLink activeTab={activeTab} tab="recentes">
+      <TabLink activeTab={activeTab} tab="recent">
         Recentes
       </TabLink>
     </div>
