@@ -15,6 +15,7 @@ describe("basic site components", () => {
     const footer = renderToStaticMarkup(<SiteFooter />);
 
     expect(header).toContain("NexusLog");
+    expect(header).toContain('href="/"');
     expect(header).toContain("Feedback");
     expect(footer).toContain("2026 NexusLog");
     expect(footer).toContain("Política de Privacidade");
