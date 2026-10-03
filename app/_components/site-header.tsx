@@ -12,18 +12,6 @@ export function SiteHeader() {
           <BrandMark className="h-6 w-6" />
           <span>NexusLog</span>
         </a>
-        <nav className="relative z-10 hidden max-w-max flex-1 items-center justify-center lg:flex">
-          <ul className="group flex flex-1 list-none items-center justify-center space-x-1">
-            <li>
-              <a
-                href="#"
-                className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-muted px-4 py-2 text-sm font-medium leading-none text-foreground transition-colors hover:bg-muted focus:bg-muted focus:outline-none"
-              >
-                Ao vivo
-              </a>
-            </li>
-          </ul>
-        </nav>
       </nav>
 
       <div className="flex gap-4 md:ml-auto md:gap-2 lg:gap-4">
